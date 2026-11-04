@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "language": "pt-BR",
+  "panels": [
+    {
+      "image": "1.png",
+      "holdAfterDialogue": 3,
+      "dialogues": []
+    },
+    {
+      "image": "2.png",
+      "holdAfterDialogue": 3,
+      "dialogues": []
+    },
+    {
+      "image": "3.png",
+      "holdAfterDialogue": 3,
+      "dialogues": []
+    },
+    {
+      "image": "4.png",
+      "holdAfterDialogue": 3,
+      "dialogues": []
+    },
+    {
+      "image": "5.png",
+      "holdAfterDialogue": 3,
+      "dialogues": [
+        {
+          "id": "fala-mw1ifyjk-7l55",
+          "text": "APROXIME-SE...",
+          "x": 17.7,
+          "y": 19.4,
+          "width": 28,
+          "fontSize": 31,
+          "charactersPerSecond": 25,
+          "delay": 0.5
+        },
+        {
+          "id": "fala-mw1ighiy-f0vu",
+          "text": "...DÉRIO",
+          "x": 79.77,
+          "y": 49.8,
+          "width": 23,
+          "fontSize": 38,
+          "charactersPerSecond": 25,
+          "delay": 2
+        }
+      ]
+    }
+  ]
+}
