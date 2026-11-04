@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="WebComic — leitura cinematográfica minimalista.">
-<title>WebComic — Leitura</title>
+<title>WebComic — Leitura cinematográfica v0.4</title>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <style>
-:root{color-scheme:light;--ink:#202020;--paper:#fff}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #333;outline-offset:4px}.intro{min-height:100svh;display:grid;place-items:center;text-align:center;padding:28px}.intro-inner{max-width:540px}.intro h1{font-size:clamp(3rem,11vw,6rem);letter-spacing:-.085em;font-weight:550;margin:0 0 1rem}.intro p{font-size:clamp(.92rem,2.5vw,1.05rem);color:#777;line-height:1.7;margin-bottom:2rem}.choices{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.choice{border:1px solid #d8d8d8;background:white;color:#222;padding:14px 24px;border-radius:999px;transition:background .2s,transform .2s}.choice:hover{background:#f4f4f4;transform:translateY(-2px)}.choice.primary{background:#222;color:#fff;border-color:#222}.choice.primary:hover{background:#444}.chapter{height:185svh;position:relative}.stage{height:100svh;position:sticky;top:0;display:grid;place-items:center;overflow:hidden;padding:clamp(12px,3vw,42px)}.panel{margin:0;width:min(95vw,1250px);height:min(85svh,900px);display:grid;place-items:center;opacity:0;transform:translate3d(0,80px,0);will-change:transform,opacity}.panel img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 15px 18px rgba(0,0,0,.07));will-change:transform}.ending{height:90svh;display:grid;place-items:center;text-align:center;padding:2rem}.ending h2{font-size:clamp(2rem,6vw,4rem);font-weight:450;letter-spacing:-.06em}.ending button{margin-top:1rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:600px){.chapter{height:165svh}.panel{width:97vw;height:82svh}}@media(prefers-reduced-motion:reduce){.panel,.panel img{will-change:auto}.choice{transition:none}}
+:root{color-scheme:light;--ink:#202020;--paper:#fff}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #333;outline-offset:4px}.intro{min-height:100svh;display:grid;place-items:center;text-align:center;padding:28px}.intro-inner{max-width:540px}.intro h1{font-size:clamp(3rem,11vw,6rem);letter-spacing:-.085em;font-weight:550;margin:0 0 1rem}.intro p{font-size:clamp(.92rem,2.5vw,1.05rem);color:#777;line-height:1.7;margin-bottom:2rem}.choices{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.choice{border:1px solid #d8d8d8;background:white;color:#222;padding:14px 24px;border-radius:999px;transition:background .2s,transform .2s}.choice:hover{background:#f4f4f4;transform:translateY(-2px)}.choice.primary{background:#222;color:#fff;border-color:#222}.choice.primary:hover{background:#444}.chapter{height:185svh;position:relative}.stage{height:100svh;position:sticky;top:0;display:grid;place-items:center;overflow:hidden;padding:clamp(12px,3vw,42px)}.panel{margin:0;width:min(95vw,1250px);height:min(85svh,900px);display:grid;place-items:center;opacity:0;transform:translate3d(0,170px,0) scale(.28);filter:blur(24px);will-change:transform,opacity,filter}.panel img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 15px 18px rgba(0,0,0,.07));will-change:transform}.ending{height:90svh;display:grid;place-items:center;text-align:center;padding:2rem}.ending h2{font-size:clamp(2rem,6vw,4rem);font-weight:450;letter-spacing:-.06em}.ending button{margin-top:1rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:600px){.chapter{height:165svh}.panel{width:97vw;height:82svh}}@media(prefers-reduced-motion:reduce){.panel,.panel img{will-change:auto}.choice{transition:none}}
 </style>
 </head>
 <body>
@@ -58,12 +58,16 @@ if(window.gsap&&window.ScrollTrigger&&!reduce){
  gsap.registerPlugin(ScrollTrigger);
  chapters.forEach(ch=>{
   const panel=ch.querySelector('.panel'),img=panel.querySelector('img');
-  // Small, soft and transparent at both ends; full-scale and crisp in the middle.
-  // Scrub makes every visual property track the reader's scroll position.
-  gsap.timeline({scrollTrigger:{trigger:ch,start:'top bottom',end:'bottom top',scrub:1.1,invalidateOnRefresh:true}})
-   .fromTo(panel,{autoAlpha:0,y:()=>Math.min(innerHeight*.20,150),scale:.48,filter:'blur(16px)'},{autoAlpha:1,y:0,scale:1,filter:'blur(0px)',duration:.42,ease:'sine.inOut'})
-   .to(panel,{autoAlpha:1,y:()=>-Math.min(innerHeight*.035,26),scale:1,filter:'blur(0px)',duration:.16,ease:'none'})
-   .to(panel,{autoAlpha:0,y:()=>-Math.min(innerHeight*.20,150),scale:.48,filter:'blur(16px)',duration:.42,ease:'sine.inOut'});
+  // Explicit 4-phase lifecycle: hidden -> focus -> hold -> hidden.
+  // Animate the outer figure only, so its scale and blur stay synchronized.
+  gsap.set(panel,{opacity:0,visibility:'visible',scale:.28,y:170,filter:'blur(24px)'});
+  gsap.timeline({defaults:{ease:'none'},scrollTrigger:{
+    trigger:ch,start:'top bottom',end:'bottom top',
+    scrub:.65,invalidateOnRefresh:true
+  }})
+   .to(panel,{opacity:1,scale:1,y:0,filter:'blur(0px)',duration:36,ease:'sine.out'})
+   .to(panel,{opacity:1,scale:1,y:-18,filter:'blur(0px)',duration:28})
+   .to(panel,{opacity:0,scale:.28,y:-170,filter:'blur(24px)',duration:36,ease:'sine.in'});
  });
  gsap.from('.intro-inner',{autoAlpha:0,y:22,duration:1.15,ease:'power2.out'});
 }else{
