@@ -1,79 +1,107 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
-<meta name="description" content="WebComic — leitura cinematográfica minimalista.">
-<title>WebComic — Leitura cinematográfica v0.4</title>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff"><meta name="description" content="WebComic — leitura cinematográfica">
+<title>WebComic — v0.5</title>
 <style>
-:root{color-scheme:light;--ink:#202020;--paper:#fff}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #333;outline-offset:4px}.intro{min-height:100svh;display:grid;place-items:center;text-align:center;padding:28px}.intro-inner{max-width:540px}.intro h1{font-size:clamp(3rem,11vw,6rem);letter-spacing:-.085em;font-weight:550;margin:0 0 1rem}.intro p{font-size:clamp(.92rem,2.5vw,1.05rem);color:#777;line-height:1.7;margin-bottom:2rem}.choices{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.choice{border:1px solid #d8d8d8;background:white;color:#222;padding:14px 24px;border-radius:999px;transition:background .2s,transform .2s}.choice:hover{background:#f4f4f4;transform:translateY(-2px)}.choice.primary{background:#222;color:#fff;border-color:#222}.choice.primary:hover{background:#444}.chapter{height:185svh;position:relative}.stage{height:100svh;position:sticky;top:0;display:grid;place-items:center;overflow:hidden;padding:clamp(12px,3vw,42px)}.panel{margin:0;width:min(95vw,1250px);height:min(85svh,900px);display:grid;place-items:center;opacity:0;transform:translate3d(0,170px,0) scale(.28);filter:blur(24px);will-change:transform,opacity,filter}.panel img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 15px 18px rgba(0,0,0,.07));will-change:transform}.ending{height:90svh;display:grid;place-items:center;text-align:center;padding:2rem}.ending h2{font-size:clamp(2rem,6vw,4rem);font-weight:450;letter-spacing:-.06em}.ending button{margin-top:1rem}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:600px){.chapter{height:165svh}.panel{width:97vw;height:82svh}}@media(prefers-reduced-motion:reduce){.panel,.panel img{will-change:auto}.choice{transition:none}}
+:root{color-scheme:light}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:#fff;color:#222;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #333;outline-offset:4px}
+.intro{height:100svh;display:grid;place-items:center;text-align:center;padding:24px}.intro h1{font-size:clamp(3.2rem,10vw,6rem);font-weight:500;letter-spacing:-.08em;margin:0 0 12px}.intro p{font-size:1rem;color:#777;line-height:1.7;margin:0 0 28px}.choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.choice{border:1px solid #d9d9d9;background:white;color:#222;border-radius:100px;padding:14px 24px;transition:background .2s}.choice:hover{background:#f5f5f5}.choice.primary{background:#222;border-color:#222;color:white}.choice.primary:hover{background:#444}
+.chapter{height:260svh;position:relative}.stage{position:sticky;top:0;height:100svh;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:clamp(10px,3vw,38px)}.panel{margin:0;display:flex;align-items:center;justify-content:center;width:min(96vw,1250px);height:min(86svh,900px);opacity:0;transform:translate3d(0,120px,0) scale(.55);will-change:transform,opacity}.panel img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 14px 18px rgba(0,0,0,.07));backface-visibility:hidden}.ending{height:90svh;display:grid;place-items:center;text-align:center;padding:2rem}.ending h2{font-size:clamp(2rem,6vw,4rem);font-weight:450;letter-spacing:-.06em}.ending .choice{margin-top:12px}
+@media(max-width:600px){.chapter{height:230svh}.panel{width:98vw;height:84svh}}@media(prefers-reduced-motion:reduce){.panel{will-change:auto}.choice{transition:none}}
 </style>
 </head>
 <body>
-<header class="intro" id="inicio"><div class="intro-inner"><h1>WebComic.</h1><p>Uma história em movimento.<br>Escolha como deseja ler.</p><div class="choices"><button class="choice primary" id="manual">Ler manualmente</button><button class="choice" id="automatic">Leitura automática</button></div></div></header>
-<main id="story" aria-label="História em cinco quadros">
+<header class="intro"><div><h1>WebComic.</h1><p>Uma história em movimento.<br>Escolha como deseja ler.</p><div class="choices"><button id="manual" class="choice primary">Ler manualmente</button><button id="automatic" class="choice">Leitura automática</button></div></div></header>
+<main aria-label="História em cinco quadros">
 <section class="chapter" aria-label="Quadro 1"><div class="stage"><figure class="panel"><img src="1.png" alt="Quadro 1" fetchpriority="high" decoding="async"></figure></div></section>
 <section class="chapter" aria-label="Quadro 2"><div class="stage"><figure class="panel"><img src="2.png" alt="Quadro 2" loading="lazy" decoding="async"></figure></div></section>
 <section class="chapter" aria-label="Quadro 3"><div class="stage"><figure class="panel"><img src="3.png" alt="Quadro 3" loading="lazy" decoding="async"></figure></div></section>
 <section class="chapter" aria-label="Quadro 4"><div class="stage"><figure class="panel"><img src="4.png" alt="Quadro 4" loading="lazy" decoding="async"></figure></div></section>
 <section class="chapter" aria-label="Quadro 5"><div class="stage"><figure class="panel"><img src="5.png" alt="Quadro 5" loading="lazy" decoding="async"></figure></div></section>
 </main>
-<footer class="ending"><div><h2>Fim.</h2><button class="choice" id="restart">Recomeçar</button></div></footer>
+<footer class="ending"><div><h2>Fim.</h2><button id="restart" class="choice">Recomeçar</button></div></footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 (()=>{
 'use strict';
-const chapters=[...document.querySelectorAll('.chapter')];
-const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let auto=false,raf=0,last=0,pausedUntil=0,pausedPanel=-1;
-const limit=()=>Math.max(0,document.documentElement.scrollHeight-innerHeight);
-function stop(){auto=false;cancelAnimationFrame(raf)}
-function scrollToStory(){window.scrollTo({top:chapters[0].offsetTop+2,behavior:reduce?'instant':'smooth'})}
-function begin(mode){stop();scrollToStory();if(mode==='auto'){auto=true;last=performance.now();pausedPanel=-1;pausedUntil=performance.now()+1600;raf=requestAnimationFrame(step)}}
-function step(now){
+const chapters=[...document.querySelectorAll('.chapter')],panels=chapters.map(c=>c.querySelector('.panel'));
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const ease=t=>t*t*(3-2*t);
+const mix=(a,b,t)=>a+(b-a)*t;
+// This is a deterministic four-phase animation, independent of CSS filters on parents.
+// Long center plateau: the image is fully sharp and full-size for 44% of each section.
+function appearance(progress){
+ const p=clamp(progress);
+ let intensity=0;
+ if(p<.28)intensity=ease(p/.28);
+ else if(p<=.72)intensity=1;
+ else intensity=ease((1-p)/.28);
+ return {intensity,offset:mix(145,0,intensity)*(p<.5?1:-1),scale:mix(.48,1,intensity),blur:mix(13,0,intensity)};
+}
+function render(index,progress){
+ const panel=panels[index],v=appearance(progress);
+ if(reduced){panel.style.opacity=v.intensity>0.05?'1':'0';panel.style.transform='none';panel.style.filter='none';return}
+ // Blur stays subtle and disappears completely throughout the extended reading plateau.
+ if(window.gsap)gsap.set(panel,{opacity:v.intensity,scale:v.scale,y:v.offset,filter:'blur('+v.blur.toFixed(2)+'px)'});
+ else{panel.style.opacity=v.intensity;panel.style.transform='translate3d(0,'+v.offset+'px,0) scale('+v.scale+')';panel.style.filter='blur('+v.blur+'px)'}
+}
+function progressFor(c){
+ const top=c.getBoundingClientRect().top;
+ return clamp((innerHeight-top)/(c.offsetHeight+innerHeight));
+}
+function refreshAll(){chapters.forEach((c,i)=>render(i,progressFor(c)))}
+let auto=false,raf=0,last=0,holdUntil=0,held=-1,autoStarting=false;
+const maxScroll=()=>Math.max(0,document.documentElement.scrollHeight-innerHeight);
+function stopAuto(){auto=false;autoStarting=false;cancelAnimationFrame(raf)}
+function autoStep(now){
  if(!auto)return;
- const dt=Math.min(now-last,50);last=now;
+ const dt=Math.min(50,Math.max(0,now-last));last=now;
  const y=scrollY;
- if(y>=limit()-3){stop();return}
- const idx=chapters.findIndex(c=>y>=c.offsetTop&&y<c.offsetTop+c.offsetHeight);
- if(idx>=0&&idx!==pausedPanel){
-  const c=chapters[idx],middle=c.offsetTop+(c.offsetHeight-innerHeight)*.5;
-  if(y>=middle-10){pausedPanel=idx;pausedUntil=now+3000}
+ if(y>=maxScroll()-3){stopAuto();return}
+ const i=chapters.findIndex(c=>y>=c.offsetTop&&y<c.offsetTop+c.offsetHeight);
+ if(i>=0&&i!==held){
+  // Stop near the center of the sharp, full-scale plateau.
+  const c=chapters[i],target=c.offsetTop+(c.offsetHeight-innerHeight)*.5;
+  if(y>=target){held=i;holdUntil=now+4500}
  }
- if(now>=pausedUntil)window.scrollTo(0,Math.min(limit(),y+dt*.105));
- raf=requestAnimationFrame(step)
+ if(now>=holdUntil)scrollTo(0,Math.min(maxScroll(),y+dt*.065));
+ raf=requestAnimationFrame(autoStep);
+}
+function begin(mode){
+ stopAuto();
+ const y=chapters[0].offsetTop;
+ // Instant jump prevents smooth scrolling from fighting the automatic timeline.
+ scrollTo({top:y,behavior:'instant'});
+ refreshAll();
+ if(mode==='auto'){auto=true;last=performance.now();holdUntil=last+1000;held=-1;raf=requestAnimationFrame(autoStep)}
 }
 document.getElementById('manual').addEventListener('click',()=>begin('manual'));
 document.getElementById('automatic').addEventListener('click',()=>begin('auto'));
-document.getElementById('restart').addEventListener('click',()=>{stop();window.scrollTo({top:0,behavior:reduce?'instant':'smooth'})});
+document.getElementById('restart').addEventListener('click',()=>{stopAuto();scrollTo({top:0,behavior:reduced?'instant':'smooth'})});
 ['wheel','touchstart','pointerdown','keydown'].forEach(type=>addEventListener(type,e=>{
  if(!auto)return;
  if(type==='keydown'&&!['ArrowUp','ArrowDown','PageUp','PageDown',' ','Home','End'].includes(e.key))return;
- stop()
+ stopAuto();
 },{passive:true}));
-if(window.gsap&&window.ScrollTrigger&&!reduce){
+if(window.gsap&&window.ScrollTrigger){
  gsap.registerPlugin(ScrollTrigger);
- chapters.forEach(ch=>{
-  const panel=ch.querySelector('.panel'),img=panel.querySelector('img');
-  // Explicit 4-phase lifecycle: hidden -> focus -> hold -> hidden.
-  // Animate the outer figure only, so its scale and blur stay synchronized.
-  gsap.set(panel,{opacity:0,visibility:'visible',scale:.28,y:170,filter:'blur(24px)'});
-  gsap.timeline({defaults:{ease:'none'},scrollTrigger:{
-    trigger:ch,start:'top bottom',end:'bottom top',
-    scrub:.65,invalidateOnRefresh:true
-  }})
-   .to(panel,{opacity:1,scale:1,y:0,filter:'blur(0px)',duration:36,ease:'sine.out'})
-   .to(panel,{opacity:1,scale:1,y:-18,filter:'blur(0px)',duration:28})
-   .to(panel,{opacity:0,scale:.28,y:-170,filter:'blur(24px)',duration:36,ease:'sine.in'});
- });
- gsap.from('.intro-inner',{autoAlpha:0,y:22,duration:1.15,ease:'power2.out'});
+ chapters.forEach((c,i)=>ScrollTrigger.create({
+  trigger:c,start:'top bottom',end:'bottom top',
+  onUpdate:self=>render(i,self.progress),
+  onEnter:()=>render(i,progressFor(c)),
+  onEnterBack:()=>render(i,progressFor(c)),
+  onLeave:()=>render(i,1),
+  onLeaveBack:()=>render(i,0)
+ }));
 }else{
- chapters.forEach(ch=>{const p=ch.querySelector('.panel');p.style.opacity='1';p.style.transform='none'});
+ addEventListener('scroll',refreshAll,{passive:true});
 }
-addEventListener('load',()=>window.ScrollTrigger?.refresh());
+addEventListener('resize',refreshAll,{passive:true});
+addEventListener('load',()=>{window.ScrollTrigger?.refresh();refreshAll()});
+refreshAll();
 })();
 </script>
 </body></html>
