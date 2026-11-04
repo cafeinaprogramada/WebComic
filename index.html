@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff"><meta name="description" content="WebComic — uma leitura cinematográfica.">
-<title>WebComic — Leitura cinematográfica v0.8</title>
+<title>WebComic — Leitura cinematográfica v0.9</title>
 <style>
 :root{color-scheme:light}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:#fff;color:#222;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #333;outline-offset:4px}
 .intro{min-height:100svh;display:grid;place-items:center;text-align:center;padding:24px}.intro h1{font-size:clamp(3.2rem,10vw,6rem);font-weight:500;letter-spacing:-.08em;margin:0 0 12px}.intro p{font-size:1rem;color:#777;line-height:1.7;margin:0 0 28px}.choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.choice{border:1px solid #d9d9d9;background:white;color:#222;border-radius:100px;padding:14px 24px;transition:background .2s}.choice:hover{background:#f5f5f5}.choice.primary{background:#222;border-color:#222;color:white}.choice.primary:hover{background:#444}
@@ -13,8 +13,7 @@
 .art-frame{position:relative;display:inline-block;max-width:100%;max-height:100%;line-height:0;isolation:isolate}
 .dialogue-overlay{position:absolute;inset:0;pointer-events:none;line-height:normal}
 .dialogue-line{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere;font-family:Arial,Helvetica,sans-serif;font-weight:750;letter-spacing:-.02em;line-height:1.2;text-transform:uppercase;color:#171717;opacity:0;transform:translate(-50%,-50%) scale(.68);transform-origin:center;pointer-events:none}
-.dialogue-line.pop{opacity:1}
-@keyframes dialogue-pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.68)}65%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
 .panel-image{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:blur(3.5px);will-change:filter}
 .ending{height:85svh;display:grid;place-items:center;text-align:center;padding:2rem}.ending h2{font-size:clamp(2rem,6vw,4rem);font-weight:450;letter-spacing:-.06em}.ending button{margin-top:12px}
 @media(max-width:600px){.chapter{height:215svh}.panel-opacity{width:98vw;height:84svh}}
@@ -41,6 +40,7 @@ const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const smooth=t=>t*t*(3-2*t);
 const lerp=(a,b,t)=>a+(b-a)*t;
 const TEXT_START=.32,TEXT_END=.70;
+if("scrollRestoration" in history)history.scrollRestoration="manual";
 let auto=false,frame=0,last=0,scrollScheduled=false,config=null;
 function state(p){
  p=clamp(p);let strength,opacity;
@@ -59,7 +59,7 @@ function dialogueTimeline(i){
   const delay=clamp(Number(d.delay)||0,0,30)*1000;
   const cps=clamp(Number(d.charactersPerSecond)||35,1,120);
   const count=Array.from(String(d.text||'')).length;
-  const start=cursor+delay, popEnd=start+320,typingEnd=popEnd+count*1000/cps;
+  const start=cursor+delay, popEnd=start+420,typingEnd=start+count*1000/cps;
   events.push({start,popEnd,typingEnd,count});
   cursor=typingEnd;
  }
@@ -93,14 +93,19 @@ function renderDialogue(i,p){
  (panel.dialogues||[]).forEach((d,j)=>{
   const el=lines[j];if(!el)return;
   const e=timeline.events[j],chars=Array.from(String(d.text||''));
-  const fraction=clamp((t-e.start)/320);
-  const count=t<e.popEnd?0:Math.min(chars.length,Math.floor((t-e.popEnd)*clamp(Number(d.charactersPerSecond)||35,1,120)/1000));
-  // Render directly from scroll progress, including reverse scrolling.
-  const visible=t>=e.start;
-  const eased=smooth(fraction),overshoot=Math.sin(fraction*Math.PI)*.10;
-  const scale=lerp(.68,1,eased)+overshoot;
-  el.style.opacity=visible?String(eased):'0';
+  const local=t-e.start;
+  const fraction=clamp(local/420);
+  // Scroll-scrubbed pop with 15% overshoot, reversible and pausable.
+  let scale,alpha;
+  if(local<0){scale=.68;alpha=0}
+  else if(fraction<.65){
+   const v=smooth(fraction/.65);scale=lerp(.68,1.15,v);alpha=clamp(fraction/.28)
+  }else{
+   const v=smooth((fraction-.65)/.35);scale=lerp(1.15,1,v);alpha=1
+  }
+  el.style.opacity=alpha.toFixed(4);
   el.style.transform='translate(-50%,-50%) scale('+scale.toFixed(4)+')';
+  const count=local<0?0:Math.min(chars.length,Math.max(1,Math.ceil(local*clamp(Number(d.charactersPerSecond)||35,1,120)/1000)));
   const content=chars.slice(0,count).join('');
   if(el.textContent!==content)el.textContent=content;
  });
@@ -166,7 +171,14 @@ async function loadConfig(){
   config=data;prepareDialogues();renderAll();
  }catch(error){console.warn('Leitor sem configuração de diálogos:',error)}
 }
+function resetOnLoad(){
+ stopAuto();
+ scrollTo({top:0,left:0,behavior:'instant'});
+ renderAll();
+}
+addEventListener('pageshow',resetOnLoad);
 renderAll();loadConfig();
+resetOnLoad();
 })();
 </script>
 </body></html>
