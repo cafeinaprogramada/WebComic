@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#ffffff"><meta name="description" content="WebComic — uma leitura cinematográfica.">
-<title>WebComic — Leitura cinematográfica v0.9</title>
+<title>WebComic — Leitura cinematográfica v1.0</title>
 <style>
 :root{color-scheme:light}*{box-sizing:border-box}html{scroll-behavior:auto}body{margin:0;background:#fff;color:#222;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden}button{font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #333;outline-offset:4px}
 .intro{min-height:100svh;display:grid;place-items:center;text-align:center;padding:24px}.intro h1{font-size:clamp(3.2rem,10vw,6rem);font-weight:500;letter-spacing:-.08em;margin:0 0 12px}.intro p{font-size:1rem;color:#777;line-height:1.7;margin:0 0 28px}.choices{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.choice{border:1px solid #d9d9d9;background:white;color:#222;border-radius:100px;padding:14px 24px;transition:background .2s}.choice:hover{background:#f5f5f5}.choice.primary{background:#222;border-color:#222;color:white}.choice.primary:hover{background:#444}
@@ -16,7 +16,14 @@
 
 .panel-image{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;filter:blur(3.5px);will-change:filter}
 .ending{height:85svh;display:grid;place-items:center;text-align:center;padding:2rem}.ending h2{font-size:clamp(2rem,6vw,4rem);font-weight:450;letter-spacing:-.06em}.ending button{margin-top:12px}
-@media(max-width:600px){.chapter{height:215svh}.panel-opacity{width:98vw;height:84svh}}
+@media(max-width:600px){
+ .chapter{height:215svh}
+ .stage{padding:12px;overflow:hidden}
+ .panel-opacity{width:100%;height:84svh;min-width:0}
+ .panel-scale{width:100%;min-width:0}
+ .art-frame{max-width:none;max-height:none;flex-shrink:0}
+ .panel-image{width:100%;height:100%;max-width:none;max-height:none;object-fit:fill}
+}
 </style>
 </head>
 <body>
@@ -66,6 +73,23 @@ function dialogueTimeline(i){
  const hold=clamp(Number(panel.holdAfterDialogue)||0,0,60)*1000;
  return {events,total:Math.max(1000,cursor+hold),lastTypingEnd:cursor};
 }
+function fitMobileFrames(){
+ const mobile=matchMedia('(max-width:600px)').matches;
+ nodes.forEach(n=>{
+  const frame=n.img.parentElement;
+  if(!mobile){
+   frame.style.width='';frame.style.height='';
+   n.img.style.width='';n.img.style.height='';
+   return;
+  }
+  const nw=n.img.naturalWidth||1000,nh=n.img.naturalHeight||1000;
+  const maxW=Math.max(100,innerWidth-24);
+  const maxH=Math.max(100,innerHeight*.82);
+  const factor=Math.min(maxW/nw,maxH/nh);
+  frame.style.width=(nw*factor).toFixed(2)+'px';
+  frame.style.height=(nh*factor).toFixed(2)+'px';
+ });
+}
 function fitDialogue(i){
  const n=nodes[i],natural=n.img.naturalWidth||1000,shown=n.img.getBoundingClientRect().width||natural;
  n.overlay.querySelectorAll('.dialogue-line').forEach(el=>{
@@ -84,7 +108,7 @@ function prepareDialogues(){
    el.setAttribute('aria-label',String(d.text||''));
    overlay.append(el);
   }
-  fitDialogue(i);
+  fitMobileFrames();fitDialogue(i);
  })
 }
 function renderDialogue(i,p){
@@ -125,9 +149,9 @@ function onScroll(){
  requestAnimationFrame(()=>{scrollScheduled=false;renderAll()})
 }
 addEventListener('scroll',onScroll,{passive:true});
-addEventListener('resize',()=>{nodes.forEach((_,i)=>fitDialogue(i));renderAll()},{passive:true});
-addEventListener('load',()=>{nodes.forEach((_,i)=>fitDialogue(i));renderAll()});
-nodes.forEach((n,i)=>n.img.addEventListener('load',()=>fitDialogue(i)));
+addEventListener('resize',()=>{fitMobileFrames();nodes.forEach((_,i)=>fitDialogue(i));renderAll()},{passive:true});
+addEventListener('load',()=>{fitMobileFrames();nodes.forEach((_,i)=>fitDialogue(i));renderAll()});
+nodes.forEach((n,i)=>n.img.addEventListener('load',()=>{fitMobileFrames();fitDialogue(i)}));
 function stopAuto(){auto=false;cancelAnimationFrame(frame)}
 const maxScroll=()=>Math.max(0,document.documentElement.scrollHeight-innerHeight);
 function step(now){
@@ -177,7 +201,7 @@ function resetOnLoad(){
  renderAll();
 }
 addEventListener('pageshow',resetOnLoad);
-renderAll();loadConfig();
+fitMobileFrames();renderAll();loadConfig();
 resetOnLoad();
 })();
 </script>
