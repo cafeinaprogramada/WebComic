@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff"><title>WebComic — Laboratório de movimento</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#fff;color:#222;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.layout{min-height:100svh;display:flex;flex-direction:column}.top{padding:18px clamp(16px,4vw,40px);border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:12px;align-items:center}.top a{color:#555;font-size:.85rem}.top strong{font-weight:600}.viewport{flex:1;min-height:42svh;display:grid;place-items:center;overflow:hidden;padding:30px 14px;background:#fff}.opacity-layer{width:min(92vw,850px);display:grid;place-items:center;opacity:1}.scale-layer{width:100%;display:grid;place-items:center;transform:translate3d(0,0,0) scale(1);transform-origin:center}.art{display:block;max-width:100%;max-height:55svh;object-fit:contain;filter:blur(0px)}.settings{border-top:1px solid #eee;padding:20px clamp(16px,4vw,40px) 30px;max-width:1100px;width:100%;margin:auto}.settings h1{font-size:1.05rem;font-weight:600;margin:0 0 6px}.settings p{font-size:.88rem;color:#666;line-height:1.5;margin:0 0 20px}.sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.slider label{display:flex;justify-content:space-between;gap:8px;font-size:.88rem;margin-bottom:10px}.slider output{font-variant-numeric:tabular-nums;color:#666}input[type=range]{width:100%;accent-color:#222;cursor:pointer}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}button{border:1px solid #d5d5d5;border-radius:99px;padding:10px 16px;background:white;color:#222;font:inherit;cursor:pointer}button.primary{background:#222;color:white;border-color:#222}button:focus-visible,a:focus-visible{outline:2px solid #555;outline-offset:3px}.status{font-size:.78rem;color:#777;margin-top:14px;min-height:1.2em}.scroll-lab{display:none}.scroll-lab.active{display:block}.scroll-area{height:360svh;position:relative}.scroll-sticky{height:100svh;position:sticky;top:0;display:grid;place-items:center;overflow:hidden}.scroll-sticky .opacity-layer{width:min(92vw,850px)}.scroll-sticky .art{max-height:75svh}.scroll-label{text-align:center;color:#777;font-size:.85rem;padding:22px}.hidden{display:none!important}@media(max-width:650px){.sliders{grid-template-columns:1fr;gap:16px}.viewport{min-height:36svh}.art{max-height:38svh}.top{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.status:after{content:" · Movimento reduzido ativo no sistema"}}
+</style></head>
+<body>
+<div class="layout" id="controls-view">
+<header class="top"><strong>WebComic · Laboratório de movimento</strong><a href="./">Voltar ao WebComic</a></header>
+<div class="viewport" aria-label="Prévia do quadro"><div class="opacity-layer" id="alpha"><div class="scale-layer" id="scale-layer"><img class="art" id="art" src="1.png" alt="Primeiro quadro da história"></div></div></div>
+<section class="settings"><h1>Teste isolado dos efeitos</h1><p>Mova cada controle individualmente. Escala, desfoque e transparência atuam em elementos separados, sem depender do GSAP.</p>
+<div class="sliders">
+<div class="slider"><label for="scale">Escala <output id="scale-value">100%</output></label><input id="scale" type="range" min="20" max="130" step="1" value="100"></div>
+<div class="slider"><label for="blur">Desfoque <output id="blur-value">0px</output></label><input id="blur" type="range" min="0" max="24" step=".5" value="0"></div>
+<div class="slider"><label for="opacity">Opacidade <output id="opacity-value">100%</output></label><input id="opacity" type="range" min="0" max="100" step="1" value="100"></div>
+</div>
+<div class="actions"><button id="reset">Restaurar</button><button id="demo" class="primary">▶ Demonstrar ciclo</button><button id="scroll">Testar com rolagem ↓</button></div><div class="status" id="status" role="status" aria-live="polite">Aguardando teste.</div></section></div>
+<section id="scroll-lab" class="scroll-lab" aria-label="Teste de animação com rolagem"><div class="scroll-label">Role para baixo: pequeno e desfocado → nítido → pequeno e desfocado</div><div class="scroll-area" id="scroll-area"><div class="scroll-sticky"><div class="opacity-layer" id="scroll-alpha"><div class="scale-layer" id="scroll-scale"><img class="art" id="scroll-art" src="1.png" alt="Quadro em teste de rolagem"></div></div></div></div><div class="scroll-label"><button id="back">Voltar aos controles</button></div></section>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const fields=['scale','blur','opacity'],values={scale:100,blur:0,opacity:100};
+let animation=0,scrollMode=false;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),smooth=t=>t*t*(3-2*t);
+function setPreview(v){$('alpha').style.opacity=String(v.opacity/100);$('scale-layer').style.transform='translate3d(0,0,0) scale('+(v.scale/100)+')';$('art').style.filter='blur('+v.blur+'px)'}
+function update(){fields.forEach(id=>{values[id]=Number($(id).value);$(id+'-value').textContent=values[id]+(id==='blur'?'px':'%')});setPreview(values)}
+function stopDemo(){cancelAnimationFrame(animation);animation=0;$('demo').textContent='▶ Demonstrar ciclo'}
+fields.forEach(id=>$(id).addEventListener('input',()=>{stopDemo();update()}));
+$('reset').addEventListener('click',()=>{stopDemo();Object.assign(values,{scale:100,blur:0,opacity:100});fields.forEach(id=>$(id).value=values[id]);update();$('status').textContent='Valores restaurados.'});
+function phase(t){const x=clamp(t,0,1);const intensity=x<.28?smooth(x/.28):x>.72?smooth((1-x)/.28):1;return {scale:35+65*intensity,blur:18*(1-intensity),opacity:100*intensity}}
+$('demo').addEventListener('click',()=>{
+ if(animation){stopDemo();return}
+ $('demo').textContent='Ⅱ Parar demonstração';$('status').textContent='Ciclo de 12 segundos: entrada, permanência e saída.';
+ const start=performance.now(),duration=12000;
+ function frame(now){const p=clamp((now-start)/duration,0,1),v=phase(p);fields.forEach(id=>$(id).value=v[id]);update();if(p<1)animation=requestAnimationFrame(frame);else stopDemo()}
+ animation=requestAnimationFrame(frame)
+});
+function scrollRender(){
+ if(!scrollMode)return;
+ const rect=$('scroll-area').getBoundingClientRect(),distance=rect.height-innerHeight;
+ const p=clamp(-rect.top/Math.max(1,distance),0,1),v=phase(p);
+ $('scroll-alpha').style.opacity=String(v.opacity/100);
+ $('scroll-scale').style.transform='translate3d(0,'+((.5-p)*80)+'px,0) scale('+(v.scale/100)+')';
+ $('scroll-art').style.filter='blur('+v.blur.toFixed(2)+'px)';
+}
+$('scroll').addEventListener('click',()=>{stopDemo();scrollMode=true;$('controls-view').classList.add('hidden');$('scroll-lab').classList.add('active');requestAnimationFrame(()=>{window.scrollTo(0,0);scrollRender()})});
+$('back').addEventListener('click',()=>{scrollMode=false;$('scroll-lab').classList.remove('active');$('controls-view').classList.remove('hidden');scrollTo(0,0)});
+addEventListener('scroll',scrollRender,{passive:true});addEventListener('resize',scrollRender,{passive:true});update();
+})();
+</script></body></html>
