@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#ffffff"><meta name="description" content="Editor visual de diálogos para o protótipo WebComic">
+<title>WebComic · Editor de diálogos</title>
+<style>
+:root{color-scheme:light;--ink:#252525;--line:#e4e4e4;--muted:#777}*{box-sizing:border-box}body{margin:0;background:#fafafa;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #555;outline-offset:2px}header{background:white;border-bottom:1px solid var(--line);padding:14px clamp(14px,3vw,30px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}header h1{font-size:1.15rem;margin:0;font-weight:650}header p{font-size:.78rem;color:var(--muted);margin:3px 0 0}header a{color:#555;font-size:.85rem}.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(285px,340px);min-height:calc(100svh - 74px)}.preview-column{padding:clamp(12px,2.5vw,30px);display:flex;flex-direction:column;gap:14px;min-width:0}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.toolbar select{padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:white;min-width:150px}.button{border:1px solid #d7d7d7;background:white;border-radius:9px;padding:9px 12px;color:#222}.button.primary{background:#252525;color:white;border-color:#252525}.button.danger{color:#a32d2d}.button:disabled{opacity:.45;cursor:default}.preview-viewport{background:white;border:1px solid var(--line);border-radius:16px;min-height:400px;flex:1;display:grid;place-items:center;padding:20px;overflow:hidden}.artboard{position:relative;display:inline-block;max-width:100%;touch-action:pan-y;line-height:0;user-select:none}.artboard>img{display:block;max-width:100%;max-height:65svh;width:auto;height:auto;object-fit:contain;pointer-events:none}.dialogue{position:absolute;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.2;text-transform:uppercase;font-family:Arial,Helvetica,sans-serif;font-weight:750;font-size:var(--font-size);letter-spacing:-.02em;color:#161616;white-space:pre-wrap;overflow-wrap:anywhere;cursor:grab;touch-action:none;border:1px dashed transparent;border-radius:4px;padding:2px}.dialogue.selected{border-color:#e36d48;background:#ffffff40}.dialogue:active{cursor:grabbing}.dialogue .text{pointer-events:none}.preview-note{color:#777;font-size:.79rem;line-height:1.5}.side{background:white;border-left:1px solid var(--line);padding:22px;overflow:auto}.side h2{font-size:1rem;margin:0 0 12px}.side p{font-size:.83rem;color:#777;line-height:1.5}.field{display:block;margin:14px 0}.field>span{display:block;font-size:.8rem;font-weight:650;margin-bottom:6px}.field input,.field textarea{width:100%;border:1px solid #d9d9d9;border-radius:8px;padding:10px;background:white}.field textarea{min-height:90px;resize:vertical;line-height:1.5}.field input[type=range]{padding:0;accent-color:#222}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.list{display:flex;flex-direction:column;gap:6px;margin:12px 0}.item{width:100%;text-align:left;border:1px solid var(--line);background:#fff;border-radius:8px;padding:10px;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.item.active{border-color:#444;background:#f6f6f6}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.muted{color:#777}.footer-actions{border-top:1px solid var(--line);margin-top:22px;padding-top:18px}.status{font-size:.8rem;color:#666;min-height:1.2em}.check{display:flex;align-items:center;gap:8px;font-size:.84rem}.check input{accent-color:#222}@media(max-width:850px){.workspace{grid-template-columns:1fr}.preview-viewport{min-height:300px}.side{border-left:0;border-top:1px solid var(--line)}.artboard>img{max-height:60svh}}@media(max-width:480px){.preview-viewport{padding:8px}.side{padding:16px}}
+</style>
+</head>
+<body>
+<header><div><h1>WebComic · Editor de diálogos</h1><p>Protótipo de configuração visual · Os textos aparecem em maiúsculas, mas são preservados no JSON.</p></div><a href="./">Voltar à leitura</a></header>
+<div class="workspace">
+<main class="preview-column">
+<div class="toolbar"><label for="panel-select">Quadro</label><select id="panel-select" aria-label="Selecionar quadro"></select><button id="add" class="button primary">+ Adicionar fala</button><button id="play" class="button">▶ Prévia das falas</button></div>
+<div class="preview-viewport"><div class="artboard" id="artboard"><img id="panel-image" src="1.png" alt="Quadro selecionado da história"></div></div>
+<div class="preview-note">Arraste o texto sobre o balão desenhado. As posições são relativas à imagem e se ajustam ao tamanho da tela. Clique numa fala para editá-la. O navegador pode traduzir o texto da página normalmente.</div>
+</main>
+<aside class="side">
+<h2>Falas deste quadro</h2><div id="dialogue-list" class="list"></div>
+<div id="editor-fields" hidden>
+<label class="field"><span>Texto da fala</span><textarea id="dialogue-text" placeholder="Escreva o diálogo normalmente"></textarea></label>
+<div class="grid"><label class="field"><span>Posição X (%)</span><input id="x" type="number" min="0" max="100" step=".1"></label><label class="field"><span>Posição Y (%)</span><input id="y" type="number" min="0" max="100" step=".1"></label></div>
+<div class="grid"><label class="field"><span>Largura (%)</span><input id="width" type="number" min="5" max="100" step=".5"></label><label class="field"><span>Tamanho (px na arte)</span><input id="fontSize" type="number" min="8" max="120" step="1"></label></div>
+<div class="grid"><label class="field"><span>Velocidade (caracteres/s)</span><input id="charactersPerSecond" type="number" min="1" max="120" step="1"></label><label class="field"><span>Espera antes (s)</span><input id="delay" type="number" min="0" max="30" step=".1"></label></div>
+<div class="actions"><button id="up" class="button">↑ Antes</button><button id="down" class="button">↓ Depois</button><button id="remove" class="button danger">Excluir fala</button></div>
+</div>
+<div class="footer-actions"><label class="field"><span>Pausa após a última fala (segundos)</span><input id="hold" type="number" min="0" max="60" step=".5" value="3"></label><div class="actions"><button id="export" class="button primary">↓ Baixar JSON</button><button id="import" class="button">↑ Importar JSON</button><input id="file" type="file" accept=".json,application/json" hidden></div><p>O JSON contém textos, ordem, posições e tempos. Você pode enviá-lo aqui na conversa para integrarmos à leitura automática.</p><p class="status" id="status" role="status" aria-live="polite"></p></div>
+</aside>
+</div>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const images=['1.png','2.png','3.png','4.png','5.png'];
+const makePanel=image=>({image,holdAfterDialogue:3,dialogues:[]});
+let project={version:1,language:'pt-BR',panels:images.map(makePanel)};
+let panelIndex=0,selected=null,drag=null,previewTimer=null;
+const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
+const current=()=>project.panels[panelIndex];
+const active=()=>current().dialogues.find(d=>d.id===selected);
+const uid=()=> 'fala-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
+function status(s){$('status').textContent=s}
+function stopPreview(){if(previewTimer){clearTimeout(previewTimer);previewTimer=null}document.querySelectorAll('.dialogue').forEach(el=>{el.style.visibility='';el.querySelector('.text').textContent=activeText(el.dataset.id)})}
+function activeText(id){return current().dialogues.find(d=>d.id===id)?.text||''}
+function selectPanel(i){stopPreview();panelIndex=i;selected=null;$('panel-select').value=String(i);$('panel-image').src=current().image;$('hold').value=current().holdAfterDialogue;render()}
+function populateSelect(){const s=$('panel-select');s.replaceChildren();project.panels.forEach((p,i)=>{const o=document.createElement('option');o.value=i;o.textContent='Quadro '+(i+1)+' · '+p.image;s.append(o)})}
+function render(){
+ const board=$('artboard');board.querySelectorAll('.dialogue').forEach(e=>e.remove());
+ const list=$('dialogue-list');list.replaceChildren();
+ current().dialogues.forEach((d,i)=>{
+  const el=document.createElement('div');el.className='dialogue'+(d.id===selected?' selected':'');el.dataset.id=d.id;
+  el.style.left=d.x+'%';el.style.top=d.y+'%';el.style.width=d.width+'%';el.style.transform='translate(-50%,-50%)';
+  // Font size is expressed in image pixels, then scaled to the displayed image width.
+  const natural=$('panel-image').naturalWidth||1000;
+  const shown=$('panel-image').getBoundingClientRect().width||natural;
+  el.style.setProperty('--font-size',Math.max(5,d.fontSize*shown/natural)+'px');
+  const text=document.createElement('span');text.className='text';text.textContent=d.text;el.append(text);
+  el.addEventListener('pointerdown',e=>startDrag(e,d.id));board.append(el);
+  const btn=document.createElement('button');btn.className='item'+(d.id===selected?' active':'');btn.textContent=(i+1)+'. '+(d.text||'(fala vazia)');btn.addEventListener('click',()=>{selected=d.id;render()});list.append(btn)
+ });
+ const d=active();$('editor-fields').hidden=!d;
+ if(d){$('dialogue-text').value=d.text;['x','y','width','fontSize','charactersPerSecond','delay'].forEach(k=>$(k).value=d[k])}
+}
+function updateField(key,value){const d=active();if(!d)return;d[key]=value;render()}
+$('panel-select').addEventListener('change',e=>selectPanel(Number(e.target.value)));
+$('add').addEventListener('click',()=>{stopPreview();const d={id:uid(),text:'Nova fala',x:50,y:35,width:36,fontSize:38,charactersPerSecond:35,delay:.5};current().dialogues.push(d);selected=d.id;render();$('dialogue-text').focus()});
+$('dialogue-text').addEventListener('input',e=>{const d=active();if(!d)return;d.text=e.target.value;const el=document.querySelector('.dialogue.selected .text');if(el)el.textContent=d.text;const btn=document.querySelector('.item.active');if(btn)btn.textContent=current().dialogues.indexOf(d)+1+'. '+d.text});
+['x','y','width','fontSize','charactersPerSecond','delay'].forEach(k=>$(k).addEventListener('input',e=>{const n=Number(e.target.value);if(!Number.isFinite(n))return;updateField(k,k==='x'||k==='y'?clamp(n,0,100):k==='width'?clamp(n,5,100):Math.max(0,n))}));
+$('hold').addEventListener('input',e=>{current().holdAfterDialogue=clamp(Number(e.target.value)||0,0,60)});
+function move(delta){const a=current().dialogues,i=a.findIndex(d=>d.id===selected),j=i+delta;if(i<0||j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];render()}
+$('up').addEventListener('click',()=>move(-1));$('down').addEventListener('click',()=>move(1));
+$('remove').addEventListener('click',()=>{current().dialogues=current().dialogues.filter(d=>d.id!==selected);selected=null;render()});
+function startDrag(e,id){
+ if(e.button!==0)return;
+ stopPreview();selected=id;render();
+ const d=active(),rect=$('panel-image').getBoundingClientRect();
+ if(!rect.width||!rect.height)return;
+ drag={id,startX:e.clientX,startY:e.clientY,x:d.x,y:d.y,w:rect.width,h:rect.height};
+ const el=[...document.querySelectorAll('.dialogue')].find(n=>n.dataset.id===id);
+ if(el){el.setPointerCapture(e.pointerId);el.addEventListener('pointermove',onDrag);el.addEventListener('pointerup',endDrag,{once:true});el.addEventListener('pointercancel',endDrag,{once:true})}
+ e.preventDefault()
+}
+function onDrag(e){if(!drag)return;const d=active();if(!d||d.id!==drag.id)return;d.x=Number(clamp(drag.x+(e.clientX-drag.startX)/drag.w*100,0,100).toFixed(2));d.y=Number(clamp(drag.y+(e.clientY-drag.startY)/drag.h*100,0,100).toFixed(2));e.currentTarget.style.left=d.x+'%';e.currentTarget.style.top=d.y+'%';$('x').value=d.x;$('y').value=d.y}
+function endDrag(e){e.currentTarget.removeEventListener('pointermove',onDrag);drag=null}
+$('panel-image').addEventListener('load',render);addEventListener('resize',render);
+function safeProject(data){
+ if(!data||!Array.isArray(data.panels)||!data.panels.length||data.panels.length>200)throw Error('JSON sem lista válida de quadros.');
+ return {version:1,language:typeof data.language==='string'?data.language:'pt-BR',panels:data.panels.map((p,i)=>{
+  if(!p||typeof p.image!=='string'||!/^[\w .-]+\.(png|jpg|jpeg|webp|avif)$/i.test(p.image))throw Error('Nome de imagem inválido no quadro '+(i+1));
+  if(!Array.isArray(p.dialogues)||p.dialogues.length>100)throw Error('Falas inválidas no quadro '+(i+1));
+  return {image:p.image,holdAfterDialogue:clamp(Number(p.holdAfterDialogue)||0,0,60),dialogues:p.dialogues.map((d,j)=>({
+   id:uid(),text:String(d.text||'').slice(0,5000),x:clamp(Number(d.x)||0,0,100),y:clamp(Number(d.y)||0,0,100),width:clamp(Number(d.width)||30,5,100),fontSize:clamp(Number(d.fontSize)||38,8,120),charactersPerSecond:clamp(Number(d.charactersPerSecond)||35,1,120),delay:clamp(Number(d.delay)||0,0,30)
+  }))}
+ })}
+}
+$('export').addEventListener('click',()=>{
+ const json=JSON.stringify(project,null,2),blob=new Blob([json],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='webcomic-dialogos.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);status('JSON exportado. Envie o arquivo nesta conversa.')
+});
+$('import').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const parsed=JSON.parse(await file.text());project=safeProject(parsed);populateSelect();selectPanel(0);status('JSON importado com sucesso.')}catch(err){status('Não foi possível importar: '+err.message)}e.target.value=''});
+$('play').addEventListener('click',()=>{
+ stopPreview();const els=[...document.querySelectorAll('.dialogue')];els.forEach(el=>{el.querySelector('.text').textContent='';el.style.visibility='hidden'});
+ const ds=current().dialogues;let index=0;
+ function next(){if(index>=ds.length){previewTimer=setTimeout(()=>{stopPreview();status('Prévia concluída.')},current().holdAfterDialogue*1000);return}
+ const d=ds[index++],el=els.find(n=>n.dataset.id===d.id);if(!el){next();return}
+ previewTimer=setTimeout(()=>{el.style.visibility='visible';const chars=Array.from(d.text),speed=1000/d.charactersPerSecond;let n=0;function type(){if(n>=chars.length){next();return}el.querySelector('.text').textContent+=chars[n++];previewTimer=setTimeout(type,speed)}type()},d.delay*1000)}
+ status('Reproduzindo falas na ordem configurada.');next()
+});
+populateSelect();selectPanel(0);
+})();
+</script>
+</body></html>
